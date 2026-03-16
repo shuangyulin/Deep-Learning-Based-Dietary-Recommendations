@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.DietplanforecastDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.entity.DietplanforecastEntity" id="dietplanforecastMap">
+        <result property="foodcategory" column="foodcategory"/>
+        <result property="heat" column="heat"/>
+        <result property="protein" column="protein"/>
+        <result property="fat" column="fat"/>
+        <result property="carbohydrate" column="carbohydrate"/>
+    </resultMap>
+
+	<select id="selectListVO"
+		resultType="com.entity.vo.DietplanforecastVO" >
+		SELECT * FROM dietplanforecast  dietplanforecast         
+        <where> 1=1 ${ew.sqlSegment}</where>
+	</select>
+	
+	<select id="selectVO"
+		resultType="com.entity.vo.DietplanforecastVO" >
+		SELECT  dietplanforecast.* FROM dietplanforecast  dietplanforecast 	
+ 		<where> 1=1 ${ew.sqlSegment}</where>
+	</select>
+
+    <select id="selectListView"
+		resultType="com.entity.view.DietplanforecastView" >
+
+		SELECT  dietplanforecast.* FROM dietplanforecast  dietplanforecast 	        
+        <where> 1=1 ${ew.sqlSegment}</where>
+	</select>
+	
+	<select id="selectView"
+		resultType="com.entity.view.DietplanforecastView" >
+		SELECT * FROM dietplanforecast  dietplanforecast <where> 1=1 ${ew.sqlSegment}</where>
+	</select>
+	
+
+
+</mapper>

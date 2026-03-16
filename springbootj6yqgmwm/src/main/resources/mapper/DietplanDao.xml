@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dao.DietplanDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.entity.DietplanEntity" id="dietplanMap">
+        <result property="foodnames" column="foodnames"/>
+        <result property="foodcategory" column="foodcategory"/>
+        <result property="recipesteps" column="recipesteps"/>
+        <result property="requiredingredients" column="requiredingredients"/>
+        <result property="requiredseasonings" column="requiredseasonings"/>
+        <result property="cooking" column="cooking"/>
+        <result property="cookingdifficulty" column="cookingdifficulty"/>
+        <result property="heat" column="heat"/>
+        <result property="protein" column="protein"/>
+        <result property="fat" column="fat"/>
+        <result property="carbohydrate" column="carbohydrate"/>
+        <result property="vitamin" column="vitamin"/>
+        <result property="mineral" column="mineral"/>
+        <result property="user" column="user"/>
+        <result property="usercomments" column="usercomments"/>
+        <result property="userrating" column="userrating"/>
+        <result property="keyword" column="keyword"/>
+    </resultMap>
+
+	<select id="selectListVO"
+		resultType="com.entity.vo.DietplanVO" >
+		SELECT * FROM dietplan  dietplan         
+        <where> 1=1 ${ew.sqlSegment}</where>
+	</select>
+	
+	<select id="selectVO"
+		resultType="com.entity.vo.DietplanVO" >
+		SELECT  dietplan.* FROM dietplan  dietplan 	
+ 		<where> 1=1 ${ew.sqlSegment}</where>
+	</select>
+
+    <select id="selectListView"
+		resultType="com.entity.view.DietplanView" >
+
+		SELECT  dietplan.* FROM dietplan  dietplan 	        
+        <where> 1=1 ${ew.sqlSegment}</where>
+	</select>
+	
+	<select id="selectView"
+		resultType="com.entity.view.DietplanView" >
+		SELECT * FROM dietplan  dietplan <where> 1=1 ${ew.sqlSegment}</where>
+	</select>
+	
+
+    <select id="selectValue" resultType="map" >
+        SELECT ${params.xColumn}, ROUND(sum(${params.yColumn}),1) total FROM dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        group by ${params.xColumn}
+    </select>
+
+    <select id="selectTimeStatValue" resultType="map" >
+        <if test = 'params.timeStatType == "日"'>
+                SELECT DATE_FORMAT(${params.xColumn},'%Y-%m-%d') ${params.xColumn}, sum(${params.yColumn}) total FROM dietplan
+                <where> 1=1 ${ew.sqlSegment}</where>
+                group by DATE_FORMAT(${params.xColumn},'%Y-%m-%d')
+        </if>
+        <if test = 'params.timeStatType == "月"'>
+                SELECT DATE_FORMAT(${params.xColumn},'%Y-%m') ${params.xColumn}, sum(${params.yColumn}) total FROM dietplan
+                <where> 1=1 ${ew.sqlSegment}</where>
+                group by DATE_FORMAT(${params.xColumn},'%Y-%m')
+        </if>
+        <if test='params.timeStatType == "季"'>
+                SELECT CONCAT(YEAR(${params.xColumn}), ' - ', ELT(QUARTER(${params.xColumn}), '第一季度', '第二季度', '第三季度', '第四季度')) as ${params.xColumn}, sum(${params.yColumn}) total FROM orders
+                <where> 1=1 ${ew.sqlSegment}</where>
+                group by CONCAT(YEAR(${params.xColumn}), ' - ', ELT(QUARTER(${params.xColumn}), '第一季度', '第二季度', '第三季度', '第四季度'))
+        </if>
+        <if test = 'params.timeStatType == "年"'>
+                SELECT DATE_FORMAT(${params.xColumn},'%Y') ${params.xColumn}, sum(${params.yColumn}) total FROM dietplan
+                <where> 1=1 ${ew.sqlSegment}</where>
+                group by DATE_FORMAT(${params.xColumn},'%Y')
+        </if>
+    </select>
+
+    <select id="selectGroup" resultType="map" >
+        SELECT ${params.column} , count(1) total FROM dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        group by ${params.column}
+    </select>
+
+    <select id="heatSectionStat" resultType="map" >
+        SELECT '200以内' as heat,case when t.200以内 is null then 0 else t.200以内 end total
+        from
+        (select
+        sum(case when heat &lt;= 200 then 1 else 0 end) as 200以内,        sum(case when heat >= 200 and heat &lt;= 300 then 1 else 0 end) as 200至300,        sum(case when heat >= 300 and heat &lt;= 400 then 1 else 0 end) as 300至400,        sum(case when heat >= 400 then 1 else 0 end) as 400以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+        union all
+        SELECT '200至300' as heat,case when t.200至300 is null then 0 else t.200至300 end total
+        from
+        (select
+        sum(case when heat &lt;= 200 then 1 else 0 end) as 200以内,        sum(case when heat >= 200 and heat &lt;= 300 then 1 else 0 end) as 200至300,        sum(case when heat >= 300 and heat &lt;= 400 then 1 else 0 end) as 300至400,        sum(case when heat >= 400 then 1 else 0 end) as 400以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+        union all
+        SELECT '300至400' as heat,case when t.300至400 is null then 0 else t.300至400 end total
+        from
+        (select
+        sum(case when heat &lt;= 200 then 1 else 0 end) as 200以内,        sum(case when heat >= 200 and heat &lt;= 300 then 1 else 0 end) as 200至300,        sum(case when heat >= 300 and heat &lt;= 400 then 1 else 0 end) as 300至400,        sum(case when heat >= 400 then 1 else 0 end) as 400以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+        union all
+        SELECT '400以上' as heat,case when t.400以上 is null then 0 else t.400以上 end total
+        from
+        (select
+        sum(case when heat &lt;= 200 then 1 else 0 end) as 200以内,        sum(case when heat >= 200 and heat &lt;= 300 then 1 else 0 end) as 200至300,        sum(case when heat >= 300 and heat &lt;= 400 then 1 else 0 end) as 300至400,        sum(case when heat >= 400 then 1 else 0 end) as 400以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+    </select>
+    <select id="proteinSectionStat" resultType="map" >
+        SELECT '10以内' as protein,case when t.10以内 is null then 0 else t.10以内 end total
+        from
+        (select
+        sum(case when protein &lt;= 10 then 1 else 0 end) as 10以内,        sum(case when protein >= 10 and protein &lt;= 15 then 1 else 0 end) as 10至15,        sum(case when protein >= 15 and protein &lt;= 25 then 1 else 0 end) as 15至25,        sum(case when protein >= 25 then 1 else 0 end) as 25以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+        union all
+        SELECT '10至15' as protein,case when t.10至15 is null then 0 else t.10至15 end total
+        from
+        (select
+        sum(case when protein &lt;= 10 then 1 else 0 end) as 10以内,        sum(case when protein >= 10 and protein &lt;= 15 then 1 else 0 end) as 10至15,        sum(case when protein >= 15 and protein &lt;= 25 then 1 else 0 end) as 15至25,        sum(case when protein >= 25 then 1 else 0 end) as 25以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+        union all
+        SELECT '15至25' as protein,case when t.15至25 is null then 0 else t.15至25 end total
+        from
+        (select
+        sum(case when protein &lt;= 10 then 1 else 0 end) as 10以内,        sum(case when protein >= 10 and protein &lt;= 15 then 1 else 0 end) as 10至15,        sum(case when protein >= 15 and protein &lt;= 25 then 1 else 0 end) as 15至25,        sum(case when protein >= 25 then 1 else 0 end) as 25以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+        union all
+        SELECT '25以上' as protein,case when t.25以上 is null then 0 else t.25以上 end total
+        from
+        (select
+        sum(case when protein &lt;= 10 then 1 else 0 end) as 10以内,        sum(case when protein >= 10 and protein &lt;= 15 then 1 else 0 end) as 10至15,        sum(case when protein >= 15 and protein &lt;= 25 then 1 else 0 end) as 15至25,        sum(case when protein >= 25 then 1 else 0 end) as 25以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+    </select>
+    <select id="fatSectionStat" resultType="map" >
+        SELECT '20以内' as fat,case when t.20以内 is null then 0 else t.20以内 end total
+        from
+        (select
+        sum(case when fat &lt;= 20 then 1 else 0 end) as 20以内,        sum(case when fat >= 20 and fat &lt;= 30 then 1 else 0 end) as 20至30,        sum(case when fat >= 30 and fat &lt;= 40 then 1 else 0 end) as 30至40,        sum(case when fat >= 40 then 1 else 0 end) as 40以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+        union all
+        SELECT '20至30' as fat,case when t.20至30 is null then 0 else t.20至30 end total
+        from
+        (select
+        sum(case when fat &lt;= 20 then 1 else 0 end) as 20以内,        sum(case when fat >= 20 and fat &lt;= 30 then 1 else 0 end) as 20至30,        sum(case when fat >= 30 and fat &lt;= 40 then 1 else 0 end) as 30至40,        sum(case when fat >= 40 then 1 else 0 end) as 40以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+        union all
+        SELECT '30至40' as fat,case when t.30至40 is null then 0 else t.30至40 end total
+        from
+        (select
+        sum(case when fat &lt;= 20 then 1 else 0 end) as 20以内,        sum(case when fat >= 20 and fat &lt;= 30 then 1 else 0 end) as 20至30,        sum(case when fat >= 30 and fat &lt;= 40 then 1 else 0 end) as 30至40,        sum(case when fat >= 40 then 1 else 0 end) as 40以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+        union all
+        SELECT '40以上' as fat,case when t.40以上 is null then 0 else t.40以上 end total
+        from
+        (select
+        sum(case when fat &lt;= 20 then 1 else 0 end) as 20以内,        sum(case when fat >= 20 and fat &lt;= 30 then 1 else 0 end) as 20至30,        sum(case when fat >= 30 and fat &lt;= 40 then 1 else 0 end) as 30至40,        sum(case when fat >= 40 then 1 else 0 end) as 40以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+    </select>
+    <select id="carbohydrateSectionStat" resultType="map" >
+        SELECT '20以内' as carbohydrate,case when t.20以内 is null then 0 else t.20以内 end total
+        from
+        (select
+        sum(case when carbohydrate &lt;= 20 then 1 else 0 end) as 20以内,        sum(case when carbohydrate >= 20 and carbohydrate &lt;= 30 then 1 else 0 end) as 20至30,        sum(case when carbohydrate >= 30 and carbohydrate &lt;= 40 then 1 else 0 end) as 30至40,        sum(case when carbohydrate >= 40 then 1 else 0 end) as 40以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+        union all
+        SELECT '20至30' as carbohydrate,case when t.20至30 is null then 0 else t.20至30 end total
+        from
+        (select
+        sum(case when carbohydrate &lt;= 20 then 1 else 0 end) as 20以内,        sum(case when carbohydrate >= 20 and carbohydrate &lt;= 30 then 1 else 0 end) as 20至30,        sum(case when carbohydrate >= 30 and carbohydrate &lt;= 40 then 1 else 0 end) as 30至40,        sum(case when carbohydrate >= 40 then 1 else 0 end) as 40以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+        union all
+        SELECT '30至40' as carbohydrate,case when t.30至40 is null then 0 else t.30至40 end total
+        from
+        (select
+        sum(case when carbohydrate &lt;= 20 then 1 else 0 end) as 20以内,        sum(case when carbohydrate >= 20 and carbohydrate &lt;= 30 then 1 else 0 end) as 20至30,        sum(case when carbohydrate >= 30 and carbohydrate &lt;= 40 then 1 else 0 end) as 30至40,        sum(case when carbohydrate >= 40 then 1 else 0 end) as 40以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+        union all
+        SELECT '40以上' as carbohydrate,case when t.40以上 is null then 0 else t.40以上 end total
+        from
+        (select
+        sum(case when carbohydrate &lt;= 20 then 1 else 0 end) as 20以内,        sum(case when carbohydrate >= 20 and carbohydrate &lt;= 30 then 1 else 0 end) as 20至30,        sum(case when carbohydrate >= 30 and carbohydrate &lt;= 40 then 1 else 0 end) as 30至40,        sum(case when carbohydrate >= 40 then 1 else 0 end) as 40以上        from dietplan
+        <where> 1=1 ${ew.sqlSegment}</where>
+        ) t
+    </select>
+
+
+
+</mapper>
